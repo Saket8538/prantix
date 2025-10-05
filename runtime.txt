@@ -1,0 +1,2 @@
+# Python Runtime for Azure App Service
+python-3.12.3

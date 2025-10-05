@@ -1,0 +1,560 @@
+{% extends 'courses/base.html' %}
+{% load course_custom_tags %}
+{% load static %}
+
+{% block title %}PrantiX - Learn What You Love{% endblock %}
+{% block body_class %}page-home{% endblock %}
+
+{% block css %}
+<style>
+    .testimonials-section { padding: 60px 0; background: #0f172a; color: #e2e8f0; }
+    .testimonials-title { text-align:center; margin-bottom: 1.5rem; font-weight: 800; }
+    .testimonials-sub { text-align:center; margin-bottom: 2rem; color:#94a3b8; }
+    .testimonials-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 280px; gap: 16px; overflow-x: auto; scroll-snap-type: none; padding-bottom: 6px; }
+    .testimonials-strip::-webkit-scrollbar { height: 8px; }
+    .testimonials-strip::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+    .testimonial-card { scroll-snap-align: start; background: #111827; border: 1px solid #1f2937; border-radius: 12px; padding: 18px; height: 100%; display:flex; flex-direction:column; justify-content:space-between; }
+    .testimonial-head { display:flex; align-items:center; gap:12px; margin-bottom: 12px; }
+    .testimonial-head img { width:48px; height:48px; border-radius: 50%; object-fit: cover; }
+    .testimonial-name { font-weight: 700; color: #f8fafc; }
+    .testimonial-role { font-size: 0.85rem; color:#94a3b8; }
+    .testimonial-text { font-size: 0.95rem; color:#cbd5e1; }
+    @media (min-width: 992px){ .testimonials-strip{ grid-auto-columns: 360px; } }
+    @media (prefers-reduced-motion: no-preference){ .testimonials-strip { scroll-behavior:smooth; } }
+    .testimonials-cta { text-align:center; margin-top: 20px; }
+    .testimonials-cta a { color:#38bdf8; text-decoration:none; font-weight:600; }
+    .testimonials-cta a:hover { text-decoration:underline; }
+    /* Partners (Government Bodies) */
+    .partners-section { padding: 48px 0; background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%); }
+    .partners-card { position: relative; background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.82)); border: 1px solid rgba(226,232,240,0.8); border-radius: 16px; padding: 20px 16px; box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06); overflow: hidden; backdrop-filter: saturate(140%) blur(8px); }
+    /* Animated colorful glow backdrop */
+    .partners-card::before { content: ""; position: absolute; inset: -120px; z-index: 0; filter: blur(60px); opacity: 0.35; background: radial-gradient(800px 500px at var(--gx,30%) var(--gy,40%), rgba(56,189,248,0.35), transparent 60%), radial-gradient(700px 450px at var(--gx2,70%) var(--gy2,60%), rgba(168,85,247,0.30), transparent 60%), radial-gradient(600px 400px at var(--gx3,50%) var(--gy3,80%), rgba(16,185,129,0.28), transparent 60%); animation: partnersGlow 16s ease-in-out infinite alternate; }
+    .partners-card > * { position: relative; z-index: 1; }
+    /* Animated gradient border ring */
+    .partners-card::after { content: ""; position: absolute; inset: 0; padding: 1px; border-radius: 16px; background: conic-gradient(from 0deg, #22d3ee, #a78bfa, #f472b6, #22d3ee); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; z-index: 1; animation: gradientSpin 10s linear infinite; }
+    @keyframes gradientSpin { to { transform: rotate(1turn); } }
+    @keyframes partnersGlow {
+        0%   { --gx: 20%; --gy: 30%; --gx2: 80%; --gy2: 40%; --gx3: 50%; --gy3: 85%; }
+        50%  { --gx: 60%; --gy: 35%; --gx2: 30%; --gy2: 65%; --gx3: 70%; --gy3: 45%; }
+        100% { --gx: 40%; --gy: 75%; --gx2: 70%; --gy2: 30%; --gx3: 20%; --gy3: 60%; }
+    }
+    .partners-title { font-weight: 800; font-size: 1.15rem; margin: 0 0 12px 8px; color: #0f172a; background: linear-gradient(90deg, #22d3ee, #a78bfa, #f472b6, #22d3ee); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientShift 8s linear infinite; }
+    @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+    .partners-strip { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: 120px; gap: 4px; align-items: center; overflow-x: auto; scroll-snap-type: none; padding: 6px; }
+    /* Edge fade to suggest scroll */
+    .partners-strip::before, .partners-strip::after { content: ""; position: sticky; top: 0; bottom: 0; width: 36px; pointer-events: none; z-index: 2; }
+    .partners-strip::before { left: 0; background: linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0)); border-top-left-radius: 16px; border-bottom-left-radius: 16px; }
+    .partners-strip::after { right: 0; background: linear-gradient(to left, rgba(255,255,255,0.9), rgba(255,255,255,0)); border-top-right-radius: 16px; border-bottom-right-radius: 16px; }
+    .partners-strip::-webkit-scrollbar { height: 8px; }
+    .partners-strip::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .partner-item { scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 10px; min-height: 114px; border-radius: 12px; transition: background-color .25s ease, box-shadow .25s ease; }
+    .partner-item img { width: 68px; height: 68px; object-fit: contain; filter: none; opacity: 1; transition: transform .25s ease; }
+    .partner-item:hover { background: rgba(99,102,241,0.06); box-shadow: 0 0 0 0 rgba(56,189,248,0.25); }
+    .partner-item:hover img, .partner-item:focus-within img { transform: scale(1.06); }
+    /* Subtle pulsing glow ring on hover */
+    .partner-item:hover { animation: partnerPulse 1.8s ease-out infinite; }
+    @keyframes partnerPulse {
+        0%   { box-shadow: 0 0 0 0 rgba(56,189,248,0.28); }
+        70%  { box-shadow: 0 0 0 14px rgba(56,189,248,0); }
+        100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+    }
+    .partner-label { margin-top: 6px; font-size: 0.8rem; color: #334155; text-align: center; }
+    .partner-sep { display: none; }
+    @media (min-width: 992px){ .partners-strip{ grid-auto-columns: 144px; } }
+    /* Respect reduced motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+        .partners-card::before, .partner-item:hover, .partners-card::after, .partners-title { animation: none !important; }
+    }
+    /* Companies strip (right-to-left marquee) */
+    .companies-strip { display: grid; grid-auto-flow: column; grid-auto-columns: 180px; gap: 16px; align-items: center; overflow-x: auto; scroll-snap-type: none; padding: 8px 4px; }
+    .companies-strip::-webkit-scrollbar { height: 8px; }
+    .companies-strip::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .company-item { scroll-snap-align: start; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; min-height: 88px; }
+    .company-logo-mark { font-weight: 700; letter-spacing: .5px; }
+    .company-sub { font-size: 0.8rem; color: #666; }
+    @media (min-width: 992px){ .companies-strip{ grid-auto-columns: 200px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        Bridging the <span class="highlight">Gap</span><br>
+                        between 
+                        <span class="highlight">Graduation</span> and <br>
+                         <span class="highlight">Career Success</span> 
+                    </h1>
+                    <p class="hero-subtitle">
+                        Get direct access to actionable insights and real-world business experience that will take your skills to the next level and beyond.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#courses" class="btn-hero">
+                            <i class="fas fa-play me-2"></i>
+                            Check Courses Made In Depth
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual text-center text-lg-end">
+                    <img src="{% static 'courses/img/hero_group.jpg' %}" alt="PrantiX Community" class="img-fluid rounded shadow-sm" style="max-height: 520px; object-fit: cover;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="25">25K+</span>
+                    <span class="stat-label">Students taught</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="20">20+</span>
+                    <span class="stat-label">Instructors</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-item">
+                    <span class="stat-number" data-target="581">581K+</span>
+                    <span class="stat-label">YouTube subs.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section class="modern-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <h2 class="section-title">
+                    Learn Beyond Degrees – Unlock Your True Potential<br>
+                    <span class="highlight"></span>
+                </h2>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Video Section -->
+<section class="modern-section">
+    <div class="container">
+        <div class="video-section">
+            <div class="video-container">
+                <!-- Replace this with your actual YouTube video embed -->
+                <iframe class="video-embed" 
+                        src="https://www.youtube.com/embed/G0-2RSq8xf0?rel=0&modestbranding=1&showinfo=0&autoplay=1&mute=1&controls=1&loop=1&playlist=G0-2RSq8xf0" 
+                        title="Prantix Introduction Video"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen
+                        loading="lazy">
+                </iframe>
+                
+            </div>
+            <div class="text-center mt-4">
+                <a href="#courses" class="btn-hero">
+                    Explore Free learning
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Courses Section -->
+<section id="courses" class="modern-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Courses Offered.</h2>
+        </div>
+        
+        <div class="course-grid stagger-animation">
+            {% for course in courses %}
+            <div class="course-card">
+                {% if course.discount > 0 %}
+                <div class="course-badge">{{course.discount}}% OFF</div>
+                {% endif %}
+                
+                <img src="{{course.thumbnail.url}}" alt="{{course.name}}" class="course-image">
+                
+                <div class="course-content">
+                    <h3 class="course-title">{{course.name}}</h3>
+                    <p class="course-description">Learn industry-standard {{course.name}} with real-world projects and hands-on experience.</p>
+                    
+                    <div class="course-price">
+                        <div>
+                            <span class="price-current">
+                                {% cal_sellprice course.price course.discount as discounted_price %}
+                                ₹{{discounted_price}}
+                            </span>
+                            {% if course.discount > 0 %}
+                            <span class="price-old">₹{{course.price}}</span>
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Live Cohort</small>
+                    </div>
+                    
+                    <div class="course-actions">
+                        {% is_enrolled request course as enrolled %}
+                        {% if enrolled %}
+                        <a href="/course/{{course.slug}}" class="btn-course primary">
+                            <i class="fas fa-play me-2"></i>Continue Learning
+                        </a>
+                        {% else %}
+                        <a href="/check-out/{{course.slug}}" class="btn-course primary">
+                            <i class="fas fa-shopping-cart me-2"></i>Enroll Now
+                        </a>
+                        <a href="/course/{{course.slug}}" class="btn-course secondary">
+                            View Details
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No courses available at the moment. Please check back later!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Companies Section -->
+<section class="companies-section">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="section-title">
+                Top <span class="highlight">companies</span> our students<br>
+                working with
+            </h2>
+        </div>
+        
+        <div class="companies-strip" id="companiesStrip" aria-label="Hiring companies">
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#d7f308; font-size: 1.4rem;">GOOGLE</div>
+                <div class="company-sub">Alphabet</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#0067b8; font-size: 1.4rem;">MICROSOFT</div>
+                <div class="company-sub">Azure & M365</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#ff9900; font-size: 1.4rem;">AMAZON</div>
+                <div class="company-sub">AWS</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#004c91; font-size: 1.4rem;">WALMART</div>
+                <div class="company-sub">Global Tech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#e50914; font-size: 1.4rem;">NETFLIX</div>
+                <div class="company-sub">Streaming</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#06934a; font-size: 1.4rem;">WIPRO</div>
+                <div class="company-sub">Tech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#ee1d23; font-size: 1.4rem;">TCS</div>
+                <div class="company-sub">Tata Consultancy</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#007cc3; font-size: 1.4rem;">INFOSYS</div>
+                <div class="company-sub">Infosys Ltd</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#bd3232; font-size: 1.4rem;">ACCENTURE</div>
+                <div class="company-sub">Consulting</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#0530ad; font-size: 1.4rem;">IBM</div>
+                <div class="company-sub">Cloud</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#d62d20; font-size: 1.4rem;">ADOBE</div>
+                <div class="company-sub">Creative Cloud</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#ff3e00; font-size: 1.4rem;">ZOMATO</div>
+                <div class="company-sub">Food Tech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#fc8019; font-size: 1.4rem;">SWIGGY</div>
+                <div class="company-sub">Food Tech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#2d2d2d; font-size: 1.4rem;">FLIPKART</div>
+                <div class="company-sub">E‑commerce</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#002970; font-size: 1.4rem;">PAYTM</div>
+                <div class="company-sub">Fintech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#0091ff; font-size: 1.4rem;">ZOHO</div>
+                <div class="company-sub">SaaS</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#0a66c2; font-size: 1.4rem;">LINKEDIN</div>
+                <div class="company-sub">Networking</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#0b5fff; font-size: 1.4rem;">DELOITTE</div>
+                <div class="company-sub">Advisory</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#ff5a5f; font-size: 1.4rem;">AIRBNB</div>
+                <div class="company-sub">Travel</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#f05138; font-size: 1.4rem;">ORACLE</div>
+                <div class="company-sub">Database</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#00a1f1; font-size: 1.4rem;">SALESFORCE</div>
+                <div class="company-sub">CRM</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#eb0fbb; font-size: 1.4rem;">GITHUB</div>
+                <div class="company-sub">Dev</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#00a884; font-size: 1.4rem;">HCL</div>
+                <div class="company-sub">Tech</div>
+            </div>
+            <div class="company-item">
+                <div class="company-logo-mark" style="color:#1877f2; font-size: 1.4rem;">META</div>
+                <div class="company-sub">Social</div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="#courses" class="btn-hero">
+                Explore Courses
+            </a>
+        </div>
+    </div>
+</section>
+<!-- Testimonials Section: placed just before footer -->
+<section class="testimonials-section">
+    <div class="container">
+        <h2 class="testimonials-title">What learners in India say about PrantiX</h2>
+        <p class="testimonials-sub">Real experiences from our cohort learners who used PrantiX courses to upskill and get job‑ready.</p>
+        <div class="testimonials-strip" id="testimonialsStrip" aria-label="Testimonials">
+            <article class="testimonial-card">
+                <div>
+                    <div class="testimonial-head">
+                        <img src="{% static 'courses/img/testimonials/t1.jpeg' %}" alt="Learner portrait">
+                        <div>
+                            <div class="testimonial-name">Aarav Sharma</div>
+                            <div class="testimonial-role">Bengaluru • Frontend Developer</div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">The React course is crisp and industry‑aligned. Mini projects plus doubt support helped me crack my first dev role.</p>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <div>
+                    <div class="testimonial-head">
+                        <img src="{% static 'courses/img/testimonials/t2.jpeg' %}" alt="Learner portrait">
+                        <div>
+                            <div class="testimonial-name">Ananya Gupta</div>
+                            <div class="testimonial-role">Pune • Data Analyst</div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">Structured content and hands‑on assignments made Python and SQL so much easier. Landed an internship in 6 weeks.</p>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <div>
+                    <div class="testimonial-head">
+                        <img src="{% static 'courses/img/testimonials/t3.jpeg' %}" alt="Learner portrait">
+                        <div>
+                            <div class="testimonial-name">Rohit Verma</div>
+                            <div class="testimonial-role">Hyderabad • Backend Engineer</div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">Django + REST APIs module is gold. Clear explanations and real use‑cases. I built a full stack app end‑to‑end.</p>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <div>
+                    <div class="testimonial-head">
+                        <img src="{% static 'courses/img/testimonials/t4.jpeg' %}" alt="Learner portrait">
+                        <div>
+                            <div class="testimonial-name">Ishita Mehta</div>
+                            <div class="testimonial-role">Delhi • Product Engineer</div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">Mentor feedback and code reviews were invaluable. The projects mirror real startup work—huge confidence boost.</p>
+                </div>
+            </article>
+
+            <article class="testimonial-card">
+                <div>
+                    <div class="testimonial-head">
+                        <img src="{% static 'courses/img/testimonials/t5.jpeg' %}" alt="Learner portrait">
+                        <div>
+                            <div class="testimonial-name">Vikram Iyer</div>
+                            <div class="testimonial-role">Chennai • Cloud & DevOps</div>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">Loved the practical labs. CI/CD and Docker sections helped me contribute at work from day one.</p>
+                </div>
+            </article>
+        </div>
+        <div class="testimonials-cta"><a href="#courses">Explore courses →</a></div>
+    </div>
+</section>
+
+<!-- Partners (Government Bodies) Section -->
+<section class="partners-section">
+    <div class="container">
+        <div class="partners-card">
+            <div class="partners-title">Proud partner of leading government bodies</div>
+            <div class="partners-strip" id="partnersStrip" aria-label="Government bodies partners">
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/skill_india.png' %}" alt="Skill India">
+                    <div class="partner-label">Skill India</div>
+                </div>
+                <div class="partner-sep" aria-hidden="true"></div>
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/nsdc.png' %}" alt="NSDC">
+                    <div class="partner-label">NSDC</div>
+                </div>
+                <div class="partner-sep" aria-hidden="true"></div>
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/aicte.png' %}" alt="AICTE">
+                    <div class="partner-label">AICTE</div>
+                </div>
+                <div class="partner-sep" aria-hidden="true"></div>
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/iitmadras.png' %}" alt="IIT Madras">
+                    <div class="partner-label">IIT Madras</div>
+                </div>
+                <div class="partner-sep" aria-hidden="true"></div>
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/msme.png' %}" alt="MSME">
+                    <div class="partner-label">MSME</div>
+                </div>
+                <div class="partner-sep" aria-hidden="true"></div>
+                <div class="partner-item">
+                    <img src="{% static 'courses/img/partners/goi.png' %}" alt="Government of India">
+                    <div class="partner-label">Government of India</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+{% endblock %}
+
+{% block js %}
+<script>
+// Custom JavaScript for homepage animations
+document.addEventListener('DOMContentLoaded', function() {
+    // Typewriter effect for hero title (optional)
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        heroTitle.style.opacity = '0';
+        setTimeout(() => {
+            heroTitle.style.opacity = '1';
+            heroTitle.style.transition = 'opacity 1s ease-in-out';
+        }, 500);
+    }
+    
+    // Smooth scroll padding for fixed navbar
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                const navHeight = document.querySelector('.modern-nav').offsetHeight;
+                const targetPosition = target.offsetTop - navHeight - 20;
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
+<script>
+// Infinite marquee for testimonials (left-to-right), pauses on hover
+document.addEventListener('DOMContentLoaded', function(){
+    const strip = document.getElementById('testimonialsStrip');
+    if(!strip) return;
+    // Duplicate children to create seamless loop
+    const items = Array.from(strip.children);
+    items.forEach(node => strip.appendChild(node.cloneNode(true)));
+
+    let rafId = null;
+    let last = performance.now();
+    const speed = 0.25; // px per ms (left -> right)
+
+    function step(now){
+        const dt = now - last; last = now;
+        strip.scrollLeft += speed * dt;
+        const half = Math.floor(strip.scrollWidth / 2);
+        if (strip.scrollLeft >= half) {
+            strip.scrollLeft -= half;
+        }
+        rafId = requestAnimationFrame(step);
+    }
+    function start(){ if(!rafId) { last = performance.now(); rafId = requestAnimationFrame(step);} }
+    function stop(){ if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
+    strip.addEventListener('mouseenter', stop);
+    strip.addEventListener('mouseleave', start);
+    start();
+});
+</script>
+<!-- Partners section is now static and user-scrollable; auto-scroll removed on request -->
+<script>
+// Companies strip auto-scroll (right-to-left), seamless loop
+document.addEventListener('DOMContentLoaded', function(){
+    const strip = document.getElementById('companiesStrip');
+    if(!strip) return;
+    // Duplicate children for seamless loop
+    const items = Array.from(strip.children);
+    items.forEach(node => strip.appendChild(node.cloneNode(true)));
+
+    let rafId = null;
+    let last = performance.now();
+    const speed = 0.22; // px per ms
+    function step(now){
+        const dt = now - last; last = now;
+        strip.scrollLeft -= speed * dt;
+        const half = Math.floor(strip.scrollWidth / 2);
+        if (strip.scrollLeft <= 0) {
+            strip.scrollLeft += half;
+        }
+        rafId = requestAnimationFrame(step);
+    }
+    function start(){ if(!rafId){ last = performance.now(); rafId = requestAnimationFrame(step);} }
+    function stop(){ if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
+    strip.addEventListener('mouseenter', stop);
+    strip.addEventListener('mouseleave', start);
+    start();
+});
+</script>
+{% endblock %}

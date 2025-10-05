@@ -1,0 +1,43 @@
+{% extends 'courses/base.html' %}
+{% block body_class %}page-my-courses{% endblock %}
+{% load course_custom_tags %}
+{%block title%}
+Signup
+{% endblock %}
+
+{%block content%}
+
+<div class="container">
+   <p class="display-6">My Courses </p>
+   <hr>
+
+   <div class="row">
+      {% for uc in user_courses %}
+      <div class="col mx-auto">
+          <div class="card mx-auto" style="width: 18rem;">
+              <img class="card-img-top" src="{{uc.course.thumbnail.url}}" alt="Card image cap">
+              <div class="card-body">
+                  <h5 class="card-title">{{uc.course.name}}</h5>
+                  
+              </div>
+
+              <div class="card-footer p-0">
+                  
+                  <div class="row no-gutters">
+                      
+                      <div class="col border-right">
+                          <a href="/course/{{uc.course.slug}}" class="btn btn-primary btn-block" style="transition: background-color 0.3s ease, transform 0.2s ease;" onmouseover="this.style.backgroundColor='#0056b3'; this.style.transform='scale(1.5)';" onmouseout="this.style.backgroundColor=''; this.style.transform='scale(1)';">
+                              Start Course
+                          </a>
+                      </div>
+                     
+                  </div>
+
+              </div>
+          </div>
+      </div>
+      {% endfor %}
+  </div>
+</div>
+
+{%endblock%}

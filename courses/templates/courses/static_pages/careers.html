@@ -1,0 +1,135 @@
+{% extends 'courses/base.html' %}
+{% block title %}Careers - PrantiX{% endblock %}
+
+{% block css %}
+<style>
+  .careers-page .hero { padding-top: 6rem; padding-bottom: 3rem; background: radial-gradient(ellipse at top right, rgba(59,130,246,.15), transparent 50%); }
+  .careers-page .card-soft { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; height: 100%; }
+  .careers-page .step { display: flex; align-items: flex-start; gap: .75rem; }
+  .careers-page .step-num { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 600; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="careers-page">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <h1 class="display-5 fw-bold mb-3">Come build learning people love</h1>
+          <p class="lead thighlight">We’re a small, product-minded team of builders and teachers. If you like shipping, teaching, and owning outcomes—let’s talk.</p>
+          <div class="d-flex gap-3">
+            <a href="mailto:careers@prantix.example" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>Send your profile</a>
+            <a href="{% url 'about' %}" class="btn btn-outline-light btn-lg"><i class="fas fa-info-circle me-2"></i>About PrantiX</a>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="card-soft p-4">
+            <h5 class="mb-3">We hire for</h5>
+            <ul class="mb-0">
+              <li>Instructors and curriculum engineers</li>
+              <li>Full‑stack and platform engineers</li>
+              <li>Content creators and videographers</li>
+              <li>Community & ops</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="fw-semibold">Why work with us</h2>
+        <p class="text-highlight">A workplace focused on ownership, craft, and learner impact.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="card-soft p-4">
+            <div class="mb-2"><i class="fas fa-rocket text-primary"></i></div>
+            <h6 class="mb-1">Real ownership</h6>
+            <p class="text-highlight mb-0">Ship end‑to‑end. Make decisions. See your work help thousands learn.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card-soft p-4">
+            <div class="mb-2"><i class="fas fa-graduation-cap text-success"></i></div>
+            <h6 class="mb-1">Learn & teach</h6>
+            <p class="text-highlight mb-0">Grow your craft while helping the community grow theirs.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card-soft p-4">
+            <div class="mb-2"><i class="fas fa-home text-warning"></i></div>
+            <h6 class="mb-1">Flexible work</h6>
+            <p class="text-muted mb-0">Hybrid/remote options with async‑friendly processes.</p>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="card-soft p-4">
+            <div class="mb-2"><i class="fas fa-heart text-danger"></i></div>
+            <h6 class="mb-1">Meaningful impact</h6>
+            <p class="text-highlight mb-0">Your work changes careers and opens opportunities.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Hiring process -->
+  <section class="py-5">
+    <div class="container">
+      <div class="row g-4 align-items-center">
+        <div class="col-lg-5">
+          <h3 class="fw-semibold mb-3">Our hiring process</h3>
+          <p class="text-highlight">We keep it simple, respectful, and focused on signal.</p>
+        </div>
+        <div class="col-lg-7">
+          <div class="card-soft p-4">
+            <div class="step mb-3">
+              <span class="step-num">1</span>
+              <div>
+                <h6 class="mb-1">Share your work</h6>
+                <p class="text-highlight mb-0">Send your resume and links to projects, repos, videos, or courses.</p>
+              </div>
+            </div>
+            <div class="step mb-3">
+              <span class="step-num">2</span>
+              <div>
+                <h6 class="mb-1">Conversation</h6>
+                <p class="text-muted mb-0">A short call to understand your goals and experience.</p>
+              </div>
+            </div>
+            <div class="step mb-3">
+              <span class="step-num">3</span>
+              <div>
+                <h6 class="mb-1">Work sample</h6>
+                <p class="text-highlight mb-0">A paid exercise or existing sample to evaluate fit.</p>
+              </div>
+            </div>
+            <div class="step">
+              <span class="step-num">4</span>
+              <div>
+                <h6 class="mb-1">Offer</h6>
+                <p class="text-highlight mb-0">If there’s a match, we move fast.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-5 text-center">
+    <div class="container">
+      <h3 class="fw-semibold mb-2">Tell us about yourself</h3>
+      <p class="text-highlight mb-4">We’ll reach out if there’s a good fit for current or upcoming roles.</p>
+      <a href="mailto:careers@prantix.example" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane me-2"></i>Send your profile</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

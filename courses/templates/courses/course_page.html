@@ -1,0 +1,695 @@
+{% extends 'courses/base.html' %}
+{% block body_class %}page-course{% endblock %}
+{% load static %}
+{% load course_custom_tags %}
+
+{%block title%}
+Courses
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'courses/css/scrollbar.css'%}">
+
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'courses/js/course_page.js' %}"></script>
+<script>
+    // Enhanced video player functionality for professional EdTech experience
+    document.addEventListener('DOMContentLoaded', function() {
+        const player = document.getElementById('player');
+        const videoLoading = document.getElementById('videoLoading');
+        const videoContainer = document.querySelector('.video-container');
+        
+        if (player && videoLoading) {
+            // Hide loading spinner when iframe loads
+            player.addEventListener('load', function() {
+                videoLoading.style.display = 'none';
+                
+                // Additional protection: hide YouTube overlay elements after load
+                setTimeout(function() {
+                    hideYouTubeOverlays();
+                }, 1000);
+            });
+            
+            // Fallback: hide loading after 3 seconds
+            setTimeout(function() {
+                if (videoLoading) {
+                    videoLoading.style.display = 'none';
+                }
+                hideYouTubeOverlays();
+            }, 3000);
+            
+            // Handle iframe load errors
+            player.addEventListener('error', function() {
+                videoLoading.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Video unavailable';
+                console.error('Video player error: Failed to load video');
+            });
+        }
+        
+        // Function to hide YouTube overlays
+        function hideYouTubeOverlays() {
+            // Try to access and hide YouTube UI elements
+            try {
+                const iframeDoc = player.contentDocument || player.contentWindow.document;
+                if (iframeDoc) {
+                    const style = iframeDoc.createElement('style');
+                    style.textContent = `
+                        .ytp-chrome-top-buttons,
+                        .ytp-share-button,
+                        .ytp-copy-link,
+                        .ytp-chrome-top,
+                        .ytp-watermark,
+                        .ytp-pause-overlay,
+                        .ytp-cards-teaser,
+                        button[aria-label*="Copy"],
+                        button[aria-label*="Share"],
+                        a[aria-label*="Copy"],
+                        a[aria-label*="Share"] {
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                        }
+                    `;
+                    iframeDoc.head.appendChild(style);
+                }
+            } catch (e) {
+                // Cross-origin restriction - this is expected and good for security
+                console.log('Cross-origin protection active');
+            }
+        }
+        
+        // Prevent right-click on video container
+        if (videoContainer) {
+            videoContainer.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Prevent text selection
+            videoContainer.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Prevent copy
+            videoContainer.addEventListener('copy', function(e) {
+                e.preventDefault();
+                return false;
+            });
+            
+            // Block mouse events on overlay areas
+            const overlay = document.querySelector('.video-overlay');
+            const shield = document.querySelector('.video-shield');
+            
+            if (overlay) {
+                overlay.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                });
+            }
+            
+            if (shield) {
+                shield.addEventListener('mousemove', function(e) {
+                    // Check if mouse is in top-right corner (where copy button appears)
+                    const rect = videoContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Top-right corner area (150px x 80px)
+                    if (x > rect.width - 150 && y < 80) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+        }
+        
+        // Ensure video container is responsive
+        function adjustVideoContainer() {
+            if (videoContainer) {
+                const containerWidth = videoContainer.offsetWidth;
+                // Force 16:9 aspect ratio
+                const calculatedHeight = (containerWidth * 9) / 16;
+                // This is handled by CSS, but we can add additional checks if needed
+            }
+        }
+        
+        // Call on load and resize
+        adjustVideoContainer();
+        window.addEventListener('resize', adjustVideoContainer);
+        
+        // Smooth scroll to video on page load if lecture parameter exists
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('lecture')) {
+            setTimeout(function() {
+                const videoElement = document.getElementById('player');
+                if (videoElement) {
+                    videoElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
+        }
+        
+        // Periodically check and hide YouTube overlays
+        setInterval(hideYouTubeOverlays, 2000);
+    });
+    
+    // YouTube IFrame API integration for better control
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    
+    
+    var ytPlayer;
+    function onYouTubeIframeAPIReady() {
+        if (document.getElementById('player')) {
+            // YouTube API is ready, player will initialize automatically
+            console.log('YouTube IFrame API ready');
+        }
+    }
+</script>
+{% endblock %}
+
+{%block content%}
+
+<style>
+    /* Hide YouTube's native overlay buttons */
+    iframe#player::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 100px;
+        background: transparent;
+        z-index: 9999;
+        pointer-events: all;
+    }
+    
+    .no-preview{
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.6;
+    }   
+    a:hover{
+        text-decoration: none;
+    }
+
+    a{
+        color: rgb(61, 59, 59);
+    }
+
+    .active-video-link{
+        color: rgb(206, 202, 196);
+    }
+
+    .active-video-link:hover{
+        text-decoration: none;
+        color: rgb(255, 255, 255);
+    }
+    
+    /* Enhanced Video List Sidebar Styling */
+    #video_list {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #video_list .list-group-item {
+        border-left: 3px solid transparent;
+        transition: all 0.3s ease;
+        padding: 0.75rem 1rem;
+    }
+    
+    #video_list .list-group-item:hover {
+        background-color: rgba(99,102,241,0.05);
+        border-left-color: #6366f1;
+    }
+    
+    #video_list .list-group-item.active-video {
+        background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(16,185,129,0.1));
+        border-left-color: #6366f1;
+        font-weight: 600;
+    }
+    
+    #video_list .list-group-item a,
+    #video_list .list-group-item span {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    #video_list .list-group-item a::before {
+        content: "▶";
+        font-size: 0.7rem;
+        color: #6366f1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    #video_list .list-group-item:hover a::before {
+        opacity: 1;
+    }
+    
+    #video_list .list-group-item.active-video a::before {
+        opacity: 1;
+        color: #10b981;
+    }
+    
+    #video_list .active-video-link {
+        color: #1f2937 !important;
+        font-weight: 600;
+    }
+    
+    #video_list .no-preview {
+        font-size: 0.9rem;
+    }
+    
+    /* Video Number Badge */
+    .video-number-badge {
+        background: #6366f1;
+        color: white;
+        padding: 0.15rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        min-width: 28px;
+        text-align: center;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    
+    #video_list .list-group-item.active-video .video-number-badge {
+        background: #10b981;
+        box-shadow: 0 2px 4px rgba(16,185,129,0.3);
+    }
+    
+    #video_list .list-group-item:hover .video-number-badge {
+        transform: scale(1.05);
+        box-shadow: 0 2px 6px rgba(99,102,241,0.4);
+    }
+    
+    .no-preview .video-number-badge {
+        background: #9ca3af;
+        opacity: 0.7;
+    }
+    
+    .video-title-text {
+        flex: 1;
+        line-height: 1.3;
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .video-number-badge {
+            font-size: 0.7rem;
+            padding: 0.1rem 0.4rem;
+            min-width: 24px;
+        }
+        
+        #video_list .list-group-item a,
+        #video_list .list-group-item span {
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Video list header */
+    .video-list-header {
+        background: linear-gradient(135deg, #6366f1, #10b981);
+        color: white;
+        padding: 0.75rem 1rem;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    /* Navigation Buttons */
+    .video-nav-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        gap: 1rem;
+    }
+    
+    .video-nav-btn {
+        flex: 1;
+        padding: 0.75rem 1.5rem;
+        border: 2px solid #e5e7eb;
+        background: white;
+        color: #374151;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .video-nav-btn:hover:not(:disabled) {
+        background: #6366f1;
+        color: white;
+        border-color: #6366f1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+    
+    .video-nav-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        background: #f3f4f6;
+    }
+    
+    .video-nav-btn i {
+        font-size: 1rem;
+    }
+    
+    /* Mobile responsive navigation */
+    @media (max-width: 576px) {
+        .video-nav-controls {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .video-nav-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 0.65rem 1rem;
+            font-size: 0.9rem;
+            min-height: 44px; /* Touch target minimum */
+        }
+        
+        .col-3 {
+            margin-top: 1rem;
+        }
+    }
+    
+    /* Professional Video Container */
+    .video-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        margin-bottom: 1.5rem;
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+    
+    .video-wrapper {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+        background: #000;
+    }
+    
+    iframe#player {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 12px;
+        pointer-events: auto;
+    }
+    
+    /* Transparent overlay to block YouTube's "Copy link" button */
+    .video-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 100px;
+        z-index: 9999;
+        background: transparent;
+        pointer-events: auto;
+        cursor: default;
+    }
+    
+    /* Additional overlay for full protection */
+    .video-shield {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        z-index: 998;
+        background: transparent;
+        pointer-events: none;
+    }
+    
+    /* Block top-right corner specifically */
+    .video-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 180px;
+        height: 90px;
+        z-index: 9998;
+        background: transparent;
+        pointer-events: auto;
+    }
+    
+    /* Ensure iframe is below overlays */
+    .video-wrapper iframe {
+        z-index: 1 !important;
+    }
+    
+    /* Loading state */
+    .video-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 1.2rem;
+        z-index: 1000;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .video-container {
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-nav-controls {
+            gap: 0.5rem;
+        }
+        
+        .video-nav-btn {
+            font-size: 0.9rem;
+            padding: 0.6rem 1rem;
+        }
+        
+        #video_list {
+            max-height: 400px;
+        }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1199px) {
+        .video-wrapper {
+            padding-bottom: 56.25%; /* Maintain 16:9 on tablets */
+        }
+    }
+    
+    @media (min-width: 1200px) {
+        .video-wrapper {
+            padding-bottom: 56.25%; /* Maintain 16:9 on desktop */
+        }
+        
+        .video-container {
+            max-width: 100%;
+        }
+    }
+</style>
+<div class="container-fluid">
+    <div>
+        
+        <br>
+
+        <div class="card p-3">
+            <div class="row">
+                <!-- Professional YouTube Video Player -->
+                <div class="col">
+                    <div class="video-container" oncontextmenu="return false;">
+                        <div class="video-wrapper">
+                            <div class="video-loading" id="videoLoading">
+                                <i class="fas fa-spinner fa-spin"></i> Loading video...
+                            </div>
+                            <iframe 
+                                id="player" 
+                                src="https://www.youtube-nocookie.com/embed/{{video.video_id}}?rel=0&modestbranding=1&fs=1&iv_load_policy=3&controls=1&disablekb=0&enablejsapi=1&playsinline=1&origin={{request.scheme}}://{{request.get_host}}&widget_referrer={{request.scheme}}://{{request.get_host}}"
+                                title="{{video.title|default:'Course Video'}}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                allowfullscreen
+                                loading="lazy"
+                                referrerpolicy="strict-origin-when-cross-origin">
+                            </iframe>
+                            <!-- Transparent overlay to block YouTube's copy link button -->
+                            <div class="video-overlay"></div>
+                            <div class="video-shield"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Previous/Next Navigation -->
+                    {% is_enrolled request course as enrolled %}
+                    <div class="video-nav-controls">
+                        {% if video.serial_number > 1 %}
+                            {% with prev_num=video.serial_number|add:"-1" %}
+                                {% for v in videos %}
+                                    {% if v.serial_number == prev_num %}
+                                        {% if enrolled or v.is_preview %}
+                                            <a href="?lecture={{v.serial_number}}" class="video-nav-btn">
+                                                <i class="fas fa-chevron-left"></i>
+                                                <span>Previous</span>
+                                            </a>
+                                        {% else %}
+                                            <button class="video-nav-btn" disabled title="Previous video requires enrollment">
+                                                <i class="fas fa-lock"></i>
+                                                <span>Previous</span>
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        {% else %}
+                            <button class="video-nav-btn" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                                <span>Previous</span>
+                            </button>
+                        {% endif %}
+                        
+                        {% if video.serial_number < videos.count %}
+                            {% with next_num=video.serial_number|add:"1" %}
+                                {% for v in videos %}
+                                    {% if v.serial_number == next_num %}
+                                        {% if enrolled or v.is_preview %}
+                                            <a href="?lecture={{v.serial_number}}" class="video-nav-btn">
+                                                <span>Next</span>
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        {% else %}
+                                            <button class="video-nav-btn" disabled title="Next video requires enrollment">
+                                                <span>Next</span>
+                                                <i class="fas fa-lock"></i>
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        {% else %}
+                            <button class="video-nav-btn" disabled>
+                                <span>Next</span>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- lecture list -->
+                <div class="col-3">
+                    <div class="video-list-header">
+                        <i class="fas fa-list"></i>
+                        <span>Course Content</span>
+                    </div>
+                    <ul id='video_list' class="list-group overflow-y-scroll">
+
+                        {% is_enrolled request course as enrolled %}
+                        {% for v in videos %}
+                            <li
+                             class="list-group-item {% if v == video %} active-video {% endif %} ">
+                             {% if enrolled or v.is_preview %}
+                                <a class="{% if v == video %} active-video-link {% endif %}" 
+                                   href="?lecture={{v.serial_number}}">
+                                    <span class="video-number-badge">{{v.serial_number}}</span>
+                                    <span class="video-title-text">{{v}}</span>
+                                </a>
+                             {% else %}
+                                <span class="text-muted no-preview" title="Enroll to access this video">
+                                    <span class="video-number-badge">{{v.serial_number}}</span>
+                                    <i class="fas fa-lock me-1"></i>
+                                    <span class="video-title-text">{{v}}</span>
+                                </span>
+                             {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- course details -->
+
+
+        <div class="mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{course.name}}</h5>
+                    <p class="card-text">{{course.description}}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prerequite -->
+        <div class="mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Prerequisite</h5>
+                    <p class="card-text">
+                    <ol>
+                        {% for pre in course.prerequisite_set.all %}
+                        <li class="">{{pre.description}}</li>
+                        {% endfor %}
+                    </ol>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learnngs -->
+        <div class="mt-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Learnings</h5>
+                    <p class="card-text">
+                    <ol>
+                        {% for l in course.learning_set.all %}
+                        <li class="">{{l.description}}</li>
+                        {% endfor %}
+                    </ol>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- learning end -->
+        <br>
+        <br>
+        <br>
+
+    </div>
+
+</div>
+
+{%endblock%}
+

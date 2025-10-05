@@ -1,0 +1,48 @@
+{% extends 'courses/base.html' %}
+{% block body_class %}page-checkout{% endblock %}
+{% load course_custom_tags %}
+{%block title%}
+Checkout - {{course.name}}
+{% endblock %}
+
+{%block content%}
+
+<div class="container">
+    <br>
+    <div class="row ">
+        <div class="col mr-auto ">
+            <div class="card ml-auto" style="width: 18rem;">
+                <img class="card-img-top" src="{{course.thumbnail.url}}" alt="Card image cap">
+                <div class="card-body">
+                    <h5 class="card-title">{{course.name}}</h5>
+                    <p class="card-text m-0 p-0">
+                        Save {{course.discount}}%
+                        <br>
+                        <span class="price">
+                            <del>{{course.price|rupee}}</del>
+                            &nbsp;
+
+                            <span>{% cal_sellprice course.price course.discount as value %} {{value|rupee}}</span>
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col ">
+            <div>
+                <p class="display-5">{{course.name}}</p>
+                <hr>
+                <p class="display-5">Payable Amount : <b>{% cal_sellprice course.price course.discount as value %}
+                        {{value|rupee}}</b></p>
+                <p>We now accept UPI payments for all courses.</p>
+                <a class="btn btn-primary" href="{% url 'payments-course' course.slug %}">Continue to Payment</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Removed Razorpay integration -->
+
+<!-- Error messages are now handled through Django messages framework -->
+{%endblock%}

@@ -1,0 +1,154 @@
+{% extends 'courses/base.html' %}
+{% load course_custom_tags %}
+
+{% block title %}
+Confirm Payment
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Confirm Your Payment</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="form-group">
+                        <div class="form-group">
+                            <label for="{{ form.course_name.id_for_label }}">Course Name:</label>
+                            {{ form.course_name }}
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.transaction_date.id_for_label }}">Transaction Date:</label>
+                            {{ form.transaction_date }}
+                            {% if form.transaction_date.errors %}
+                            <div class="text-danger">
+                                {% for error in form.transaction_date.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Select the date of your payment transaction.</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="{{ form.mobile_number.id_for_label }}">Mobile Number:</label>
+                            {{ form.mobile_number }}
+                            {% if form.mobile_number.errors %}
+                            <div class="text-danger">
+                                {% for error in form.mobile_number.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter your mobile number used for payment.</small>
+                        </div>
+                            <label for="{{ form.transaction_id.id_for_label }}">Transaction ID:</label>
+                            {{ form.transaction_id }}
+                            {% if form.transaction_id.errors %}
+                            <div class="text-danger">
+                                {% for error in form.transaction_id.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter the UPI transaction ID from your payment app.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.amount.id_for_label }}">Amount Paid:</label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                            <div class="text-danger">
+                                {% for error in form.amount.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Enter the exact amount you paid.</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.screenshot.id_for_label }}">Payment Screenshot:</label>
+                            {{ form.screenshot }}
+                            {% if form.screenshot.errors %}
+                            <div class="text-danger">
+                                {% for error in form.screenshot.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">Upload a screenshot of your payment confirmation.</small>
+                        </div>
+                        
+                        {{ form.course_id }}
+                        {{ form.coupon_code }}
+                        {{ form.coupon_discount }}
+                        {{ form.original_amount }}
+
+                        <div class="alert alert-warning mt-3">
+                            <p class="mb-0"><strong>Important:</strong> Please pay exactly <span id="confirm-important-amount">₹{{ form.amount.value|default:form.initial.amount }}</span> to complete your enrollment.</p>
+                        </div>
+                        <div class="alert alert-info">
+                            <p><strong>Note:</strong> Your payment will be verified by our team. Once verified, you will receive access to the course.</p>
+                            <p>You will receive an email notification when your payment is confirmed.</p>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg btn-block mt-4">Submit Payment Details</button>
+                        <script>
+                        // Auto-populate hidden coupon fields from URL if present
+                        document.addEventListener('DOMContentLoaded', function() {
+                            function getParam(name) {
+                                const url = new URL(window.location.href);
+                                return url.searchParams.get(name) || '';
+                            }
+                            const couponCode = getParam('coupon_code');
+                            const couponDiscount = getParam('coupon_discount');
+                            const originalAmount = getParam('original_amount');
+                            if (couponCode) {
+                                const el = document.getElementById('id_coupon_code');
+                                if (el) el.value = couponCode;
+                            }
+                            if (couponDiscount) {
+                                const el = document.getElementById('id_coupon_discount');
+                                if (el) el.value = couponDiscount;
+                            }
+                            if (originalAmount) {
+                                const el = document.getElementById('id_original_amount');
+                                if (el) el.value = originalAmount;
+                            }
+
+                            // Keep the Important amount in sync with the Amount field
+                            const amountInput = document.getElementById('id_amount');
+                            const importantAmt = document.getElementById('confirm-important-amount');
+                            if (amountInput && importantAmt) {
+                                const sync = () => {
+                                    const v = Math.floor(parseFloat(amountInput.value));
+                                    if (!isNaN(v)) {
+                                        importantAmt.textContent = '₹' + v;
+                                    } else if (amountInput.value) {
+                                        importantAmt.textContent = amountInput.value; // fallback to raw
+                                    }
+                                };
+                                sync();
+                                amountInput.addEventListener('input', sync);
+                            }
+                        });
+                        </script>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

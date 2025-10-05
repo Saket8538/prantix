@@ -1,0 +1,140 @@
+{% extends 'courses/base.html' %}
+{% block title %}About Us - PrantiX{% endblock %}
+
+{% block css %}
+<style>
+  .about-page .hero {
+    background: radial-gradient(ellipse at top left, rgba(99,102,241,.15), transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(16,185,129,.15), transparent 50%);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    padding-top: 6rem;
+    padding-bottom: 3rem;
+  }
+  .about-page .badge-soft { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); }
+  .about-page .stat-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; }
+  .about-page .value-card { border: 1px solid rgba(255,255,255,.08); border-radius: 12px; height: 100%; }
+  .about-page .section-highlight { background: rgba(255,255,255,.03); border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="about-page">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <span class="badge badge-soft text-uppercase mb-3"><i class="fas fa-bolt me-1"></i> Learn by Building</span>
+          <h1 class="display-5 fw-bold mb-3">We teach what we practice every day</h1>
+          <p class="lead text-highlight mb-4">PrantiX is an industry-focused learning platform. We bridge the gap between graduation and a job-ready skillset through project-based courses, mentorship, and a community that ships.</p>
+          <div class="d-flex gap-3">
+            <a href="{% url 'courses' %}" class="btn btn-primary btn-lg"><i class="fas fa-compass me-2"></i>Explore Courses</a>
+            <a href="mailto:prantix.official@outlook.com" class="btn btn-outline-light btn-lg"><i class="fas fa-envelope me-2"></i>Contact Us</a>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="stat-card p-4">
+            <div class="row g-3 text-center">
+              <div class="col-6">
+                <h2 class="fw-bold mb-0">10k+</h2>
+                <div class="text-highlight">Learners</div>
+              </div>
+              <div class="col-6">
+                <h2 class="fw-bold mb-0">120+</h2>
+                <div class="text-highlight">Projects built</div>
+              </div>
+              <div class="col-6">
+                <h2 class="fw-bold mb-0">25+</h2>
+                <div class="text-highlight">Expert mentors</div>
+              </div>
+              <div class="col-6">
+                <h2 class="fw-bold mb-0">4.9/5</h2>
+                <div class="text-highlight">Avg. ratings</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How we teach -->
+  <section class="py-5">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="fw-semibold">How we help you get job‑ready</h2>
+        <p class="text-highlight">Clear, outcome-driven learning—no fluff.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="value-card p-4">
+            <div class="d-flex align-items-center mb-3"><span class="btn btn-sm btn-primary rounded-circle me-2"><i class="fas fa-hammer"></i></span><h5 class="mb-0">Project‑based learning</h5></div>
+            <p class="text-highlight mb-0">Build real apps and systems. Ship features. Learn by doing with code that mirrors production scenarios.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="value-card p-4">
+            <div class="d-flex align-items-center mb-3"><span class="btn btn-sm btn-success rounded-circle me-2"><i class="fas fa-user-friends"></i></span><h5 class="mb-0">Mentor support</h5></div>
+            <p class="text-highlight mb-0">Get unblocked fast. Instructors and community mentors guide you through tricky concepts and reviews.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="value-card p-4">
+            <div class="d-flex align-items-center mb-3"><span class="btn btn-sm btn-warning rounded-circle me-2"><i class="fas fa-briefcase"></i></span><h5 class="mb-0">Career outcomes</h5></div>
+            <p class="text-highlight mb-0">Portfolio-worthy projects and skills that map directly to roles employers hire for.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Our values -->
+  <section class="py-5 section-highlight">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h3 class="fw-semibold">Our principles</h3>
+          <p class="text-highlight">These values drive our course design and teaching style.</p>
+        </div>
+        <div class="col-lg-8">
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="value-card p-4 h-100">
+                <h5><i class="fas fa-check-circle text-success me-2"></i>Clarity over hype</h5>
+                <p class="text-highlight mb-0">We avoid buzzwords and focus on practical skills that deliver value on the job.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="value-card p-4 h-100">
+                <h5><i class="fas fa-shield-alt text-primary me-2"></i>Quality over quantity</h5>
+                <p class="text-highlight mb-0">Fewer, deeper courses that we’re truly excellent at—kept up to date.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="value-card p-4 h-100">
+                <h5><i class="fas fa-heart text-danger me-2"></i>Learner first</h5>
+                <p class="text-highlight mb-0">We prioritize outcomes, support, and a friendly community for every learner.</p>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="value-card p-4 h-100">
+                <h5><i class="fas fa-code text-warning me-2"></i>Build and ship</h5>
+                <p class="text-highlight mb-0">Every module results in something tangible—features, services, or artifacts.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-5">
+    <div class="container text-center">
+      <h3 class="fw-semibold mb-2">Ready to start building?</h3>
+      <p class="text-highlight mb-4">Join thousands of learners leveling up their skills with PrantiX.</p>
+      <a href="{% url 'courses' %}" class="btn btn-primary btn-lg"><i class="fas fa-rocket me-2"></i>Browse Courses</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

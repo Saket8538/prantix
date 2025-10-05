@@ -1,0 +1,259 @@
+{% extends 'courses/base.html' %}
+{% load course_custom_tags %}
+
+{% block css %}
+<style>
+  .payment-instructions h6 { font-size: 1.1rem; font-weight: 700; }
+  .payment-instructions p { font-size: 1rem; line-height: 1.5; }
+  .payment-instructions .text-warning { background: rgba(255,193,7,.1); padding:10px; border-radius:8px; border-left:4px solid #ffc107; }
+  .coupon-section { transition: all .3s ease; }
+  .coupon-section:hover { box-shadow: 0 4px 15px rgba(0,123,255,.15); }
+  #coupon-code { font-weight: bold; font-family: 'Courier New', monospace; }
+  .coupon-success { color:#28a745 !important; background:rgba(40,167,69,.1); padding:8px 12px; border-radius:5px; border:1px solid rgba(40,167,69,.3); }
+  .coupon-error { color:#dc3545 !important; background:rgba(220,53,69,.1); padding:8px 12px; border-radius:5px; border:1px solid rgba(220,53,69,.3); }
+  .final-price-section { border:2px solid rgba(40,167,69,.3); animation: pulse-success 2s infinite; }
+  @keyframes pulse-success { 0%{box-shadow:0 0 0 0 rgba(40,167,69,.4);} 70%{box-shadow:0 0 0 10px rgba(40,167,69,0);} 100%{box-shadow:0 0 0 0 rgba(40,167,69,0);} }
+</style>
+{% endblock %}
+
+{% block body_class %}page-payment{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Make Payment via UPI</h4>
+                </div>
+                <div class="card-body text-center">
+                    <h5>Scan QR Code or use UPI ID</h5>
+                    <div class="my-4">
+                        <img src="{{ qr_code }}" alt="UPI QR Code" class="img-fluid" style="max-width: 250px;">
+                    </div>
+                    <div class="my-3">
+                        <h5>UPI ID: {{ upi_id }}</h5>
+                    </div>
+                    
+                    <!-- Permanent Payment Instructions -->
+                    <div class="payment-instructions mt-4 mb-4">
+                        <div class="alert alert-primary border-0 shadow-sm payment-permanent" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white;">
+                            <h6 class="mb-3"><i class="fas fa-mobile-alt me-2"></i>Payment Instructions</h6>
+                            <p class="mb-2"><strong>Please make the payment using any UPI app like Google Pay, PhonePe, Paytm, etc.</strong></p>
+                            <p class="mb-2">After payment, click the button below to submit your payment details.</p>
+                                            {% if course %}
+                                            {% cal_sellprice course.price course.discount as discounted_price %}
+                                            <p class="mb-0 font-weight-bold text-warning">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                                <strong>Important: Please pay exactly <span id="important-final-price">{{ discounted_price|rupee }}</span> to complete your enrollment.</strong>
+                                            </p>
+                                            {% endif %}
+                        </div>
+                    </div>
+                    {% if course %}
+                    <div id="payment-meta" data-course-id="{{ course.id }}" style="display:none"></div>
+                    <a href="#" id="submit-payment-btn" class="btn btn-success btn-lg mt-3">
+                        Submit Payment Details
+                    </a>
+                    {% else %}
+                    <a href="/payment-confirm/" class="btn btn-success btn-lg mt-3">
+                        Submit Payment Details
+                    </a>
+                    <p class="mt-2 text-muted">You can still submit payment details without selecting a course.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if course %}
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4>Course Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="mr-3">
+                            <img src="{{ course.thumbnail.url }}" alt="{{ course.name }}" class="img-fluid" style="max-width: 150px;">
+                        </div>
+                        <div>
+                            <h5>{{ course.name }}</h5>
+                            <p>{{ course.description }}</p>
+                            
+                            <!-- Price Details -->
+                            <div class="price-section">
+                                <p class="text-success font-weight-bold">
+                                    Original Price: <del id="original-price">{{ course.price|rupee }}</del>
+                                    {% cal_sellprice course.price course.discount as discounted_price %}
+                                    <br>Course Price: <span id="course-price" data-raw="{{ discounted_price }}">{{ discounted_price|rupee }}</span>
+                                    {% if course.discount > 0 %}
+                                    <span class="badge badge-warning">{{ course.discount }}% OFF</span>
+                                    {% endif %}
+                                </p>
+                                
+                                <!-- Coupon Section -->
+                                <div class="coupon-section mt-3 p-3" style="background: rgba(0, 123, 255, 0.1); border-radius: 8px; border: 1px solid rgba(0, 123, 255, 0.2);">
+                                    <h6 class="mb-3"><i class="fas fa-ticket-alt me-2"></i>Have a Coupon Code?</h6>
+                                    <div class="input-group mb-2">
+                                        <input type="text" 
+                                               id="coupon-code" 
+                                               class="form-control" 
+                                               placeholder="Enter coupon code" 
+                                               >
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" type="button" id="apply-coupon">Apply</button>
+                                        </div>
+                                    </div>
+                                    <div id="coupon-message" class="small"></div>
+                                    
+                                    <!-- Coupon Discount Display -->
+                                    <div id="coupon-discount" class="mt-2" style="display: none;">
+                                        <p class="text-success mb-1">
+                                            <i class="fas fa-check-circle me-1"></i>
+                                            Coupon Discount: <span id="coupon-discount-amount">₹0</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Final Price -->
+                                <div class="final-price-section mt-3 p-2" style="background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
+                                    <h5 class="text-success mb-0">
+                                        Final Price: <span id="final-price">{{ discounted_price|rupee }}</span>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const couponInput = document.getElementById('coupon-code');
+        const applyButton = document.getElementById('apply-coupon');
+        const messageDiv = document.getElementById('coupon-message');
+        const discountDiv = document.getElementById('coupon-discount');
+        const discountAmountSpan = document.getElementById('coupon-discount-amount');
+        const finalPriceSpan = document.getElementById('final-price');
+        const coursePriceSpan = document.getElementById('course-price');
+        const metaDiv = document.getElementById('payment-meta');
+        const courseId = metaDiv ? Number(metaDiv.dataset.courseId) : null;
+        let activeCoupon = null;
+
+        let originalPrice = 0;
+        if (coursePriceSpan && coursePriceSpan.dataset && coursePriceSpan.dataset.raw) {
+            originalPrice = Number(coursePriceSpan.dataset.raw) || 0;
+        }
+
+        function updatePrice(finalPrice, discountAmount = 0) {
+            const fp = Math.floor(Number(finalPrice) || 0);
+            if (finalPriceSpan) finalPriceSpan.textContent = '₹' + fp;
+            const importantSpan = document.getElementById('important-final-price');
+            if (importantSpan) importantSpan.textContent = '₹' + fp;
+            if (discountAmount > 0) {
+                const da = Math.floor(Number(discountAmount) || 0);
+                if (discountAmountSpan) discountAmountSpan.textContent = '₹' + da;
+                if (discountDiv) discountDiv.style.display = 'block';
+            } else {
+                if (discountDiv) discountDiv.style.display = 'none';
+            }
+        }
+
+        function showMessage(message, isSuccess = false) {
+            if (messageDiv) {
+                messageDiv.textContent = message;
+                messageDiv.className = isSuccess ? 'small coupon-success' : 'small coupon-error';
+            }
+        }
+
+        function clearMessage() {
+            if (messageDiv) { messageDiv.textContent = ''; messageDiv.className = 'small'; }
+        }
+
+        function validateCoupon() {
+            if (!couponInput) return;
+            const code = couponInput.value.trim();
+            if (!code) { showMessage('Please enter a coupon code.'); return; }
+            if (!courseId) { showMessage('Course not available for coupon validation.'); return; }
+
+            if (applyButton) { applyButton.disabled = true; applyButton.textContent = 'Validating...'; }
+            clearMessage();
+
+            fetch('/api/validate-coupon/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code, course_id: courseId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.valid) {
+                    activeCoupon = data;
+                    updatePrice(data.final_price, data.discount_amount);
+                    showMessage(data.message, true);
+                    if (applyButton) { applyButton.textContent = 'Applied'; applyButton.className = 'btn btn-success'; }
+                    if (couponInput) couponInput.disabled = true;
+                } else {
+                    activeCoupon = null;
+                    updatePrice(originalPrice);
+                    showMessage(data.message, false);
+                    if (applyButton) { applyButton.textContent = 'Apply'; applyButton.className = 'btn btn-primary'; }
+                }
+            })
+            .catch(() => {
+                showMessage('Error validating coupon. Please try again.', false);
+                if (applyButton) { applyButton.textContent = 'Apply'; applyButton.className = 'btn btn-primary'; }
+            })
+            .finally(() => { if (applyButton) applyButton.disabled = false; });
+        }
+
+        if (applyButton && couponInput) {
+            applyButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!courseId) { showMessage('Course not available for coupon validation.'); return; }
+                validateCoupon();
+            });
+        }
+
+        if (couponInput) {
+            couponInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') validateCoupon();
+            });
+            couponInput.addEventListener('input', function() {
+                if (activeCoupon) {
+                    activeCoupon = null;
+                    updatePrice(originalPrice);
+                    clearMessage();
+                    if (applyButton) { applyButton.textContent = 'Apply'; applyButton.className = 'btn btn-primary'; }
+                    this.disabled = false;
+                }
+            });
+        }
+
+        const submitBtn = document.getElementById('submit-payment-btn');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                let url = '/payment-confirm/?';
+                let sep = '';
+                if (courseId) { url += 'course_id=' + encodeURIComponent(courseId); sep = '&'; }
+                if (activeCoupon) {
+                    url += sep + 'amount=' + encodeURIComponent(Math.floor(activeCoupon.final_price));
+                    url += '&original_amount=' + encodeURIComponent(Math.floor(originalPrice));
+                    url += '&coupon_code=' + encodeURIComponent(couponInput ? couponInput.value.trim() : '');
+                    url += '&coupon_discount=' + encodeURIComponent(Math.floor(activeCoupon.discount_amount));
+                } else {
+                    url += sep + 'amount=' + encodeURIComponent(Math.floor(originalPrice));
+                }
+                window.location.href = url;
+            });
+        }
+    });
+</script>
+{% endblock %}
