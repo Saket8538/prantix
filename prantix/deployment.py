@@ -6,29 +6,35 @@ from .settings import BASE_DIR
 # CRITICAL: Use .get() with defaults to prevent crashes on missing env vars
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', os.environ.get('SECRET_KEY', 'CHANGE-ME-IN-PRODUCTION'))
 
-# Support both WEBSITE_HOSTNAME and ALLOWED_HOSTS env vars
+# WEBSITE_HOSTNAME is automatically set by Azure App Service (read-only system variable)
+# DO NOT manually create WEBSITE_HOSTNAME in App Settings - Azure provides it automatically
 WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', '')
+
+# Use ALLOWED_HOSTS from App Settings (you already set this correctly)
 allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
 
 # Parse ALLOWED_HOSTS from Azure (can be comma-separated or single value)
 if allowed_hosts_env:
+    # User explicitly set ALLOWED_HOSTS in Azure App Settings
     if ',' in allowed_hosts_env:
         ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
     else:
         ALLOWED_HOSTS = [allowed_hosts_env.strip()]
-    # Add wildcard support
+    # Add wildcard support for Azure
     ALLOWED_HOSTS.extend(['*.azurewebsites.net'])
-elif WEBSITE_HOSTNAME:
-    ALLOWED_HOSTS = [WEBSITE_HOSTNAME, f".{WEBSITE_HOSTNAME}", '*.azurewebsites.net']
-else:
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
-# CSRF trusted origins
-if allowed_hosts_env:
     primary_host = allowed_hosts_env.split(',')[0].strip() if ',' in allowed_hosts_env else allowed_hosts_env.strip()
-    CSRF_TRUSTED_ORIGINS = [f"https://{primary_host}", "https://*.azurewebsites.net"]
 elif WEBSITE_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS = [f"https://{WEBSITE_HOSTNAME}", "https://*.azurewebsites.net"]
+    # Fallback to WEBSITE_HOSTNAME if ALLOWED_HOSTS not set (Azure auto-provides this)
+    ALLOWED_HOSTS = [WEBSITE_HOSTNAME, f".{WEBSITE_HOSTNAME}", '*.azurewebsites.net']
+    primary_host = WEBSITE_HOSTNAME
+else:
+    # Development/local fallback
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    primary_host = 'localhost'
+
+# CSRF trusted origins based on detected hostname
+if primary_host and primary_host != 'localhost':
+    CSRF_TRUSTED_ORIGINS = [f"https://{primary_host}", "https://*.azurewebsites.net"]
 else:
     CSRF_TRUSTED_ORIGINS = []
 
