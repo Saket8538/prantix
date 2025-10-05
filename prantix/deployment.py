@@ -2,10 +2,20 @@ import os
 from .settings import *
 from .settings import BASE_DIR
 
-SECRET_KEY = os.environ['DJANGO_SECRET_KEY']    
-ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']]
-CSRF_TRUSTED_ORIGINS = [f"https://{os.environ['WEBSITE_HOSTNAME']}"]
-DEBUG = False
+# CRITICAL: Use .get() with defaults to prevent crashes on missing env vars
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', os.environ.get('SECRET_KEY', 'CHANGE-ME-IN-PRODUCTION'))
+WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', 'localhost')
+
+# Allow both with and without wildcard
+ALLOWED_HOSTS = [WEBSITE_HOSTNAME]
+if WEBSITE_HOSTNAME != 'localhost':
+    ALLOWED_HOSTS.extend([f".{WEBSITE_HOSTNAME}", '*.azurewebsites.net'])
+
+CSRF_TRUSTED_ORIGINS = [f"https://{WEBSITE_HOSTNAME}"]
+if WEBSITE_HOSTNAME != 'localhost':
+    CSRF_TRUSTED_ORIGINS.append(f"https://*.azurewebsites.net")
+
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
 # Security settings for production
 SECURE_SSL_REDIRECT = True
@@ -44,7 +54,16 @@ DATABASES = {
 }
 
 # Static and Media Files Configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Django 4.2+ uses STORAGES instead of STATICFILES_STORAGE
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
