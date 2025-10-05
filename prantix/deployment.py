@@ -1,19 +1,36 @@
 import os
+import re
 from .settings import *
 from .settings import BASE_DIR
 
 # CRITICAL: Use .get() with defaults to prevent crashes on missing env vars
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', os.environ.get('SECRET_KEY', 'CHANGE-ME-IN-PRODUCTION'))
-WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', 'localhost')
 
-# Allow both with and without wildcard
-ALLOWED_HOSTS = [WEBSITE_HOSTNAME]
-if WEBSITE_HOSTNAME != 'localhost':
-    ALLOWED_HOSTS.extend([f".{WEBSITE_HOSTNAME}", '*.azurewebsites.net'])
+# Support both WEBSITE_HOSTNAME and ALLOWED_HOSTS env vars
+WEBSITE_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME', '')
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '')
 
-CSRF_TRUSTED_ORIGINS = [f"https://{WEBSITE_HOSTNAME}"]
-if WEBSITE_HOSTNAME != 'localhost':
-    CSRF_TRUSTED_ORIGINS.append(f"https://*.azurewebsites.net")
+# Parse ALLOWED_HOSTS from Azure (can be comma-separated or single value)
+if allowed_hosts_env:
+    if ',' in allowed_hosts_env:
+        ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
+    else:
+        ALLOWED_HOSTS = [allowed_hosts_env.strip()]
+    # Add wildcard support
+    ALLOWED_HOSTS.extend(['*.azurewebsites.net'])
+elif WEBSITE_HOSTNAME:
+    ALLOWED_HOSTS = [WEBSITE_HOSTNAME, f".{WEBSITE_HOSTNAME}", '*.azurewebsites.net']
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# CSRF trusted origins
+if allowed_hosts_env:
+    primary_host = allowed_hosts_env.split(',')[0].strip() if ',' in allowed_hosts_env else allowed_hosts_env.strip()
+    CSRF_TRUSTED_ORIGINS = [f"https://{primary_host}", "https://*.azurewebsites.net"]
+elif WEBSITE_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS = [f"https://{WEBSITE_HOSTNAME}", "https://*.azurewebsites.net"]
+else:
+    CSRF_TRUSTED_ORIGINS = []
 
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
@@ -37,21 +54,49 @@ MIDDLEWARE = [
 ]
 
 # Database Configuration for Azure PostgreSQL Flexible Server
-# Use Managed Identity for secure authentication (recommended)
-# Connection strings are automatically injected by Azure App Service
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DBNAME', 'prantix_db'),
-        'HOST': os.environ.get('DBHOST', ''),
-        'USER': os.environ.get('DBUSER', ''),
-        'PASSWORD': os.environ.get('DBPASS', ''),
-        'PORT': '5432',
-        'OPTIONS': {
-            'sslmode': 'require',  # Enforce SSL for security
-        },
+# Azure provides connection string in AZURE_POSTGRESQL_CONNECTIONSTRING
+# Parse it or use individual env vars (DBNAME, DBHOST, DBUSER, DBPASS)
+
+# Try to parse Azure connection string first
+azure_db_connection = os.environ.get('AZURE_POSTGRESQL_CONNECTIONSTRING', '')
+
+if azure_db_connection:
+    # Parse Azure connection string format:
+    # "dbname=xxx host=xxx.postgres.database.azure.com port=5432 sslmode=require user=xxx password=xxx"
+    db_config = {}
+    for pair in azure_db_connection.split():
+        if '=' in pair:
+            key, value = pair.split('=', 1)
+            db_config[key] = value
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': db_config.get('dbname', 'prantix_db'),
+            'HOST': db_config.get('host', ''),
+            'USER': db_config.get('user', ''),
+            'PASSWORD': db_config.get('password', ''),
+            'PORT': db_config.get('port', '5432'),
+            'OPTIONS': {
+                'sslmode': db_config.get('sslmode', 'require'),
+            },
+        }
     }
-}
+else:
+    # Fallback to individual environment variables
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DBNAME', 'prantix_db'),
+            'HOST': os.environ.get('DBHOST', ''),
+            'USER': os.environ.get('DBUSER', ''),
+            'PASSWORD': os.environ.get('DBPASS', ''),
+            'PORT': '5432',
+            'OPTIONS': {
+                'sslmode': 'require',  # Enforce SSL for security
+            },
+        }
+    }
 
 # Static and Media Files Configuration
 # Django 4.2+ uses STORAGES instead of STATICFILES_STORAGE
