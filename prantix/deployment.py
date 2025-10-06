@@ -128,3 +128,30 @@ STATIC_URL = '/static/'
 # For now, local storage works but consider Azure Blob Storage for scalability
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
+# Recipients for error emails
+ADMINS = [
+    ('Saket', 'code.saket@gmail.com'),  # Primary admin
+]
+MANAGERS = ADMINS  # Also receives broken link notifications
+
+# Override to use SMTP instead of console backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
