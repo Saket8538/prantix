@@ -41,12 +41,18 @@ else:
 DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 't')
 
 # Security settings for production
-SECURE_SSL_REDIRECT = True
+# CRITICAL: Do NOT set SECURE_SSL_REDIRECT=True on Azure App Service!
+# Azure terminates SSL at the load balancer, causing infinite redirect loops
+# Azure handles HTTPS automatically - the app receives HTTP from the load balancer
+SECURE_SSL_REDIRECT = False  # Azure handles SSL termination
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+
+# Azure-specific: Trust the X-Forwarded-Proto header from Azure's load balancer
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
