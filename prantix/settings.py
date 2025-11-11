@@ -26,9 +26,11 @@ STATIC_ROOT = '/home/site/wwwroot/staticfiles'
 SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-k-_g6qy58vc0i#1bpwcsfhzh8#%n(ng1@p1!_+wuzbcqmm!i_g')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
+24
+= config('ALLOWED_HOSTS', default='*', cast=Csv())
+CSRF_TRUSTED_ORIGINS = ['https://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net', 'http://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net']
 
 # Application definition
 
