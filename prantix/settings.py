@@ -78,12 +78,8 @@ WSGI_APPLICATION = 'prantix.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DBNAME', default=''),
-        'USER': config('DBUSER', default=''),
-        'PASSWORD': config('DBPASS', default=''),
-        'HOST': config('DBHOST', default=''),
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
