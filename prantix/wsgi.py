@@ -13,11 +13,12 @@ from django.core.wsgi import get_wsgi_application
 
 # Automatically detect if running on Azure and use deployment settings
 # Check for WEBSITE_HOSTNAME environment variable (set by Azure App Service)
-if os.environ.get('WEBSITE_HOSTNAME'):
-    settings_module = 'prantix.deployment'
-else:
-    settings_module = os.environ.get('DJANGO_SETTINGS_MODULE', 'prantix.settings')
-
+settings_module = os.environ.get('DJANGO_SETTINGS_MODULE')
+if not settings_module:
+    if os.environ.get('WEBSITE_HOSTNAME'):
+        settings_module = 'prantix.deployment'
+    else:
+        settings_module = 'prantix.settings'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
 
 application = get_wsgi_application()
