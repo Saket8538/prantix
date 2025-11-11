@@ -15,11 +15,11 @@ pip install -r requirements.txt
 
 # Collect static files (with --noinput to avoid prompts)
 echo "Collecting static files..."
-python manage.py collectstatic --noinput --settings=prantix.deployment
+python manage.py collectstatic --noinput --settings=prantix.settings
 
 # Run database migrations
 echo "Running database migrations..."
-python manage.py migrate --noinput --settings=prantix.deployment
+python manage.py migrate --noinput --settings=prantix.settings
 
 # Start Gunicorn with deployment settings
 echo "Starting Gunicorn web server..."
