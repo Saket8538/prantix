@@ -29,9 +29,20 @@ SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-k-_g6qy58vc0i#
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 24
-= config('ALLOWED_HOSTS', default='*', cast=Csv())
-CSRF_TRUSTED_ORIGINS = ['https://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net', 'http://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net']
-
+ALLOWED_HOSTS = [
+    'prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net',
+    'prantix.live',
+    'www.prantix.live',
+    'localhost',
+    '127.0.0.1',
+CSRF_TRUSTED_ORIGINS = [
+    'https://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net',
+    'http://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net',
+    'https://prantix.live',
+    'http://prantix.live',
+    'https://www.prantix.live',
+    'http://www.prantix.live',
+]
 # Application definition
 
 INSTALLED_APPS = [
