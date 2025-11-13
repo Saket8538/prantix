@@ -35,6 +35,7 @@ ALLOWED_HOSTS = [
     'www.prantix.live',
     'localhost',
     '127.0.0.1',
+    ]
 CSRF_TRUSTED_ORIGINS = [
     'https://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net',
     'http://prantix-g8ftfjh3bpdceyaj.centralindia-01.azurewebsites.net',
