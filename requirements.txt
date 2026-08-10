@@ -11,7 +11,7 @@ psycopg2-binary==2.9.10  # PostgreSQL driver for Azure Database
 
 # Web Server (Production)
 gunicorn==20.0.4  # WSGI HTTP Server for Azure App Service
-setuptools>=68.0.0  # Fix: provides pkg_resources required by gunicorn on Python 3.12
+setuptools>=68.0.0,<81  # Fix: provides pkg_resources required by gunicorn (versions 81+ dropped pkg_resources)
 whitenoise==6.11.0  # Static file serving
 
 # REST Framework
